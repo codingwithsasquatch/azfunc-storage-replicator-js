@@ -1,0 +1,123 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
+    "contentVersion": "1.0.0.0",
+  "parameters": {
+    "name": {
+      "type": "string",
+      "metadata": {
+        "description": "The name used as a prefix for the services for the IoT device"
+      }
+    },
+    "funcSourceCodeRepoURL": {
+      "type": "string",
+      "defaultValue": "https://github.com/codingwithsasquatch/azfunc-storage-replicator-js.git"
+    },
+    "funcSourceCodeBranch": {
+      "type": "string",
+      "defaultValue": "master"
+    },
+    "funcInputStorageAcount": {
+      "type": "string",
+      "metadata": {
+        "description": "The coonection string used for the input storage account. If default is left, we will use the storage account created with the function"
+      },
+      "defaultValue": "default"
+    },
+    "funcOutputStorageAcount": {
+      "type": "string",
+      "metadata": {
+        "description": "The coonection string used for the input storage account. If default is left, we will use the storage account created with the function"
+      },
+      "defaultValue": "default"
+    },
+    "storageEndpointSuffix": {
+      "type": "string",
+      "metadata": {
+        "description": "Suffix added to Azure Storage hostname (examples: core.windows.net, core.cloudapi.de)"
+      },
+      "defaultValue": "core.windows.net"
+    }
+  },
+  "variables": {
+    "location": "[resourceGroup().location]",
+    "storageVersion": "2016-01-01",
+    "storageName": "[concat(parameters('name'), 'storage')]",
+    "storageAccountType": "Standard_LRS",
+    "storageId": "[resourceId('Microsoft.Storage/storageAccounts', variables('storageName'))]",
+    "funcName": "[concat(parameters('name'),'func')]",
+    "funcVersion": "2015-08-01",
+    "funcASPVersion": "2015-04-01",
+    "funcASPName": "[concat(parameters('name'),'funcASP')]"
+  },
+    "resources": [
+        {
+            "apiVersion": "[variables('storageVersion')]",
+            "type": "Microsoft.Storage/storageAccounts",
+            "name": "[variables('storageName')]",
+            "location": "[variables('location')]",
+            "kind": "Storage",
+            "sku": {
+                "name": "[variables('storageAccountType')]"
+            }
+        },
+      {
+        "type": "Microsoft.Web/serverfarms",
+        "apiVersion": "[variables('funcASPVersion')]",
+        "name": "[variables('funcASPName')]",
+        "location": "[resourceGroup().location]",
+        "properties": {
+          "name": "[variables('funcASPName')]",
+          "computeMode": "Dynamic",
+          "sku": "Dynamic"
+        }
+      },
+        {
+        "apiVersion": "[variables('funcVersion')]",
+        "name": "[variables('funcName')]",
+        "type": "Microsoft.Web/sites",
+        "kind": "functionapp",
+        "location": "[variables('location')]",
+        "dependsOn": [
+            "[resourceId('Microsoft.Storage/storageAccounts', variables('storageName'))]",
+            "[resourceId('Microsoft.Web/serverfarms', variables('funcASPName'))]"
+        ],
+        "properties": {
+            "serverFarmId": "[variables('funcASPName')]"
+
+        },
+        "resources": [
+            {
+                "apiVersion": "2015-08-01",
+                "name": "appsettings",
+                "type": "config",
+                "dependsOn": [
+                "[resourceId('Microsoft.Web/Sites', variables('funcName'))]",
+                "[resourceId('Microsoft.Web/Sites/sourcecontrols', variables('funcName'), 'web')]",
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('storageName'))]"
+                ],
+              "properties": {
+                "FUNCTIONS_EXTENSION_VERSION": "~1",
+                "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING": "[concat('DefaultEndpointsProtocol=https;EndpointSuffix=', parameters('storageEndpointSuffix'), ';AccountName=', variables('storageName'), ';AccountKey=', listKeys(variables('storageId'),'2015-05-01-preview').key1)]",
+                "WEBSITE_CONTENTSHARE": "[toLower(variables('funcName'))]",
+                "AzureWebJobsStorage": "[concat('DefaultEndpointsProtocol=https;EndpointSuffix=', parameters('storageEndpointSuffix'), ';AccountName=', variables('storageName'), ';AccountKey=', listKeys(variables('storageId'),'2015-05-01-preview').key1)]",
+                "AzureWebJobsDashboard": "[concat('DefaultEndpointsProtocol=https;EndpointSuffix=', parameters('storageEndpointSuffix'), ';AccountName=', variables('storageName'), ';AccountKey=', listKeys(variables('StorageId'),'2015-05-01-preview').key1)]",
+                "inputStorageConnection": "[if(equals(parameters('funcInputStorageAcount'),'default'), concat('DefaultEndpointsProtocol=https;EndpointSuffix=', parameters('storageEndpointSuffix'), ';AccountName=', variables('storageName'), ';AccountKey=', listKeys(variables('StorageId'),'2015-05-01-preview').key1), parameters('funcInputStorageAcount'))]",
+                "outputStorageConnection": "[if(equals(parameters('funcOutputStorageAcount'),'default'), concat('DefaultEndpointsProtocol=https;EndpointSuffix=', parameters('storageEndpointSuffix'), ';AccountName=', variables('storageName'), ';AccountKey=', listKeys(variables('StorageId'),'2015-05-01-preview').key1), parameters('funcOutputStorageAcount'))]"
+              }
+            },
+            {
+                "apiVersion": "2015-08-01",
+                "name": "web",
+                "type": "sourcecontrols",
+                "dependsOn": [
+                    "[resourceId('Microsoft.Web/sites/', variables('funcName'))]"
+                ],
+                "properties": {
+                    "RepoUrl": "[parameters('funcSourceCodeRepoURL')]",
+                    "branch": "[parameters('funcSourceCodeBranch')]"
+                }
+            }
+        ]
+        }
+    ]
+}
