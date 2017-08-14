@@ -58,7 +58,7 @@
     },
 		"OutputPath": {
 			"type": "string",
-			"defaultValue": "outputCsharp",
+			"defaultValue": "outputJS",
 			"metadata": {
 				"description": "The path in which to write the replicated file."
 			}
@@ -140,11 +140,11 @@
           },
           {
             "name": "InputPath",
-            "value": "[parameter('InputPath')]"
+            "value": "[parameters('InputPath')]"
           },
           {
             "name": "OutputPath",
-            "value": "[parameter('OutputPath')]"
+            "value": "[parameters('OutputPath')]"
           }
         ]
       }
