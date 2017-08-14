@@ -5,14 +5,14 @@
       "name": "inputBlob",
       "type": "blobTrigger",
       "direction": "in",
-      "path": "input/{name}",
-      "connection": "inputStorageConnection"
+      "path": "%InputPath%/{name}",
+      "connection": "InputStorageConnection"
     },
     {
       "name": "outputBlob",
       "type": "blob",
-      "path": "jsOutput/{name}",
-      "connection": "outputStorageConnection",
+      "path": "%OutputPath%/{name}",
+      "connection": "OutputStorageConnection",
       "direction": "out"
     }
   ]

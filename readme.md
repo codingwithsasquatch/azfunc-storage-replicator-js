@@ -1,6 +1,6 @@
 # Azure Function Storage Replicator - JavaScript
 
-[![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](https://azuredeploy.net/)
+[![Deploy to Azure](http://azuredeploy.net/deploybutton.svg)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fcodingwithsasquatch%2Fazfunc-storage-replicator-js%2Fmaster%2Fazuredeploy.json)
 
 
 The `Storage Replicator` makes it incredibly easy to copy all changes to new Blobs inside of Azure Storage Account to another Azure Storage Acount. This sample demonstrates a simple use case of processing data from a given Blob using Javascript.
