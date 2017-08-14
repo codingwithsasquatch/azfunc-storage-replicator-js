@@ -58,7 +58,7 @@
     },
 		"OutputPath": {
 			"type": "string",
-			"defaultValue": "outputJS",
+			"defaultValue": "outputjs",
 			"metadata": {
 				"description": "The path in which to write the replicated file."
 			}
