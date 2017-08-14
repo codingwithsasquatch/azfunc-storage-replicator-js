@@ -67,7 +67,7 @@
 	"variables": {
 		"functionAppName": "[parameters('appName')]",
 		"hostingPlanName": "[concat(parameters('appName'), '-plan')]",
-    "storageAccountName": "[concat(uniquestring(resourceGroup().id), 'functions')]",
+    "storageAccountName": "[concat(parameters('appName'),uniquestring(resourceGroup().id))]",
     "storageAccountid": "[concat(resourceGroup().id,'/providers/','Microsoft.Storage/storageAccounts/', variables('storageAccountName'))]"
 	},
 	"resources": [
